@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxSelectableObjects.hpp"
 
 class ofApp : public ofBaseApp{
 
