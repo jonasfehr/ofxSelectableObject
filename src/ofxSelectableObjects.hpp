@@ -25,10 +25,16 @@ public:
         ofRemoveListener(ofEvents().mouseReleased, this, &ofxSelectableObjects::mouseReleased, OF_EVENT_ORDER_BEFORE_APP);
     }
     
-    void setup(int x, int y, int w, int h, int spacing = 5, bool isVertical = false){
+    void setup( ofRectangle rect, bool isRadio = true,  bool isVertical = false, int fixedSize = 0, int spacing = 5){
+        setup(rect.getLeft(), rect.getTop(), rect.getWidth(), rect.getHeight(), isRadio, isVertical, fixedSize, spacing);
+    }
+    
+    void setup(int x, int y, int w, int h, bool isRadio = true, bool isVertical = false, int fixedSize = 0, int spacing = 5){
         objectsRectangle.set(x,y,w,h);
         this->spacing = spacing;
+        this->fixedSize = fixedSize;
         this->isVertical = isVertical;
+        this->isRadio = isRadio;
     }
     
     void add(SelectableObjectBase &selectableObject){
@@ -46,19 +52,19 @@ public:
         int numObjects = selectableObjects.size();
         
         if(isVertical){
-
             int w = objectsRectangle.getWidth()-2*spacing;
-            int h = (objectsRectangle.getHeight()-(numObjects+1)*spacing)/numObjects;
-            cout << h << endl;
+            int h = fixedSize;
+            if(fixedSize == 0) h = (objectsRectangle.getHeight()-(numObjects+1)*spacing)/numObjects;
             int i = 0;
             for(auto & sO : selectableObjects){
                 y = objectsRectangle.getTop()+(h + spacing)*i+spacing;
                 sO.second->setClickableSurface(x, y, w, h);
                 i++;
             }
+            
         } else {
-
-            int w = (objectsRectangle.getWidth()-(numObjects+1)*spacing)/numObjects;
+            int w = fixedSize;
+            if(fixedSize == 0) w = (objectsRectangle.getWidth()-(numObjects+1)*spacing)/numObjects;
             int h = objectsRectangle.getHeight()-2*spacing;
             
             int i = 0;
@@ -68,6 +74,10 @@ public:
                 i++;
             }
         }
+        
+        
+        // activate latest added
+        activate(selectableObject.getKey());
     }
     
     
@@ -79,16 +89,22 @@ public:
         }
     }
     
+    void activate(string key){
+        currentSelectedKey = key;
+        for( auto & selectableObject : selectableObjects){
+            if(selectableObject.second->getKey() == currentSelectedKey && isRadio) selectableObject.second->activate();
+            else selectableObject.second->deactivate();
+        }
+        currentSelectedIndex = selectableObjects[currentSelectedKey]->getIndex();
+        ofNotifyEvent(keyChangedE, currentSelectedKey, this);
+        ofNotifyEvent(indexChangedE, currentSelectedIndex, this);
+    }
+    
     bool mouseReleased(ofMouseEventArgs &e){
-        
         glm::vec2 mousePos = e;
         for( auto & selectableObject : selectableObjects){
             if(selectableObject.second->clickableSurface.inside(mousePos)){
-                string key = selectableObject.first;
-                for( auto & selectableObject : selectableObjects){
-                    if(selectableObject.second->getKey() == key) selectableObject.second->activate();
-                    else selectableObject.second->deactivate();
-                }
+                activate(selectableObject.second->getKey());
             }
         }
     }
@@ -96,8 +112,16 @@ public:
     map<string, SelectableObjectBase*> selectableObjects;
     ofRectangle objectsRectangle;
     int index;
-    int spacing;
+    int spacing, fixedSize;
     bool isVertical;
+    bool isRadio;
+    
+    string currentSelectedKey;
+    int currentSelectedIndex;
+    
+    ofEvent<string> keyChangedE;
+    ofEvent<int> indexChangedE;
+
 
 };
 #endif /* ofxSelectableObjects_hpp */
