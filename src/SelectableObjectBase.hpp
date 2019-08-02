@@ -40,7 +40,8 @@ public:
     
     void setIndex( int index ){ this->index = index; }
     int getIndex(){ return index; }
-    string & getKey(){ return key; }
+    string setKey(string key){ this->key = key; }
+    string getKey(){ return key; }
 
 
     virtual void draw(){
