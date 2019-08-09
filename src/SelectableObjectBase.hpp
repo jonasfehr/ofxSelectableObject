@@ -40,7 +40,7 @@ public:
     
     void setIndex( int index ){ this->index = index; }
     int getIndex(){ return index; }
-    string setKey(string key){ this->key = key; }
+    void setKey(string newKey){ this->key = newKey; }
     string getKey(){ return key; }
 
 

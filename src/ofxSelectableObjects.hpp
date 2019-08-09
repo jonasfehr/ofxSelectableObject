@@ -12,6 +12,12 @@
 #include "ofMain.h"
 #include "SelectableObjectBase.hpp"
 
+enum SelectType: int{
+    ST_RADIO,
+    ST_TOGGLE,
+    ST_PRESSED
+};
+
 
 class ofxSelectableObjects {
 public:
@@ -20,8 +26,8 @@ public:
     ~ofxSelectableObjects();
     
     void setup();
-    void setup( ofRectangle rect, bool isRadio = true,  bool isVertical = false, int fixedSize = 0, int spacing = 5);
-    void setup(int x, int y, int w, int h, bool isRadio = true, bool isVertical = false, int fixedSize = 0, int spacing = 5);
+    void setup( ofRectangle rect, SelectType type = ST_RADIO,  bool isVertical = false, int fixedSize = 0, int spacing = 5);
+    void setup(int x, int y, int w, int h, SelectType type = ST_RADIO, bool isVertical = false, int fixedSize = 0, int spacing = 5);
     
     void add(SelectableObjectBase &selectableObject);
     void recalcPositioning();
@@ -38,8 +44,10 @@ public:
     int getIndexFromKey(string key);
     
     void activate(int index);
+    void deactivate(int index);
     bool mouseReleased(ofMouseEventArgs &e);
-    
+    bool mousePressed(ofMouseEventArgs &e);
+
     int size();
     
     int getIndex();
@@ -52,15 +60,15 @@ public:
     int index;
     int spacing, fixedSize;
     bool isVertical;
-    bool isRadio;
     
-    string currentSelectedKey;
-    int currentSelectedIndex;
+    int lastPressedIndex;
     
-    ofEvent<string> keyChangedE;
-    ofEvent<int> indexChangedE;
-
-
+    SelectType type;
+    
+    ofEvent<string> keyActivatedE;
+    ofEvent<int> indexActivatedE;
+    ofEvent<string> keyDeactivatedE;
+    ofEvent<int> indexDeactivatedE;
 };
 #endif /* ofxSelectableObjects_hpp */
 

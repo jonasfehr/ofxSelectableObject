@@ -9,13 +9,15 @@
 
 ofxSelectableObjects::ofxSelectableObjects(){
     ofAddListener(ofEvents().mouseReleased, this, &ofxSelectableObjects::mouseReleased, OF_EVENT_ORDER_BEFORE_APP);
+    ofAddListener(ofEvents().mousePressed, this, &ofxSelectableObjects::mousePressed, OF_EVENT_ORDER_BEFORE_APP);
     index = 0;
-    setup(0, 0, 200, 30, true, false, 0, 5);
+    setup(0, 0, 200, 30, ST_RADIO, false, 0, 5);
 
 }
 
 ofxSelectableObjects::~ofxSelectableObjects(){
     ofRemoveListener(ofEvents().mouseReleased, this, &ofxSelectableObjects::mouseReleased, OF_EVENT_ORDER_BEFORE_APP);
+    ofRemoveListener(ofEvents().mousePressed, this, &ofxSelectableObjects::mousePressed, OF_EVENT_ORDER_BEFORE_APP);
 //    for (auto pointer : selectableObjects){
 //        delete pointer;
 //    }
@@ -23,16 +25,16 @@ ofxSelectableObjects::~ofxSelectableObjects(){
 }
 
 
-void ofxSelectableObjects::setup( ofRectangle rect, bool isRadio,  bool isVertical, int fixedSize, int spacing){
-    setup(rect.getLeft(), rect.getTop(), rect.getWidth(), rect.getHeight(), isRadio, isVertical, fixedSize, spacing);
+void ofxSelectableObjects::setup( ofRectangle rect, SelectType type,  bool isVertical, int fixedSize, int spacing){
+    setup(rect.getLeft(), rect.getTop(), rect.getWidth(), rect.getHeight(), type, isVertical, fixedSize, spacing);
 }
 
-void ofxSelectableObjects::setup(int x, int y, int w, int h, bool isRadio, bool isVertical, int fixedSize, int spacing){
+void ofxSelectableObjects::setup(int x, int y, int w, int h, SelectType type, bool isVertical, int fixedSize, int spacing){
     objectsRectangle.set(x,y,w,h);
+    this->type = type;
     this->spacing = spacing;
     this->fixedSize = fixedSize;
     this->isVertical = isVertical;
-    this->isRadio = isRadio;
     this->index = 0;
 }
 
@@ -46,7 +48,8 @@ void ofxSelectableObjects::add(SelectableObjectBase &selectableObject){
     
     recalcPositioning();
     // activate latest added
-    activate(selectableObject.getIndex());
+    if(type == ST_RADIO) activate(selectableObject.getIndex());
+    else selectableObject.deactivate();
 }
 
 void ofxSelectableObjects::deleteSelected(){
@@ -65,7 +68,8 @@ void ofxSelectableObjects::reIndex(){
         selectableObject->setIndex(index);
         index++;
     }
-    activate(index-1);
+    if(lastPressedIndex < selectableObjects.size()) activate(lastPressedIndex);
+    else activate(index-1);
 
 }
 
@@ -145,17 +149,66 @@ int ofxSelectableObjects::getIndexFromKey(string key){
 
 void ofxSelectableObjects::activate(int index){
     if(index < 0 || index > selectableObjects.size()-1) return;
-    currentSelectedIndex = index;
+    lastPressedIndex = index;
     for( auto & selectableObject : selectableObjects){
-        if(selectableObject->getIndex() == currentSelectedIndex && isRadio) selectableObject->activate();
-        else selectableObject->deactivate();
+        switch(type){
+            case ST_RADIO:
+                if(selectableObject->getIndex() == lastPressedIndex) selectableObject->activate();
+                else selectableObject->deactivate();
+                break;
+            case ST_TOGGLE:
+                if(selectableObject->getIndex() == lastPressedIndex){
+                    if(selectableObject->isActive()) selectableObject->deactivate();
+                    else selectableObject->activate();
+                }
+                break;
+                
+            case ST_PRESSED:
+                if(selectableObject->getIndex() == lastPressedIndex) selectableObject->activate();
+                break;
+        }
+
     }
-    currentSelectedKey = selectableObjects[currentSelectedIndex]->getKey();
-    ofNotifyEvent(keyChangedE, currentSelectedKey, this);
-    ofNotifyEvent(indexChangedE, currentSelectedIndex, this);
+    string currentSelectedKey = selectableObjects[lastPressedIndex]->getKey();
+    ofNotifyEvent(keyActivatedE, currentSelectedKey, this);
+    ofNotifyEvent(indexActivatedE, lastPressedIndex, this);
+}
+
+void ofxSelectableObjects::deactivate(int index){
+    if(index < 0 || index > selectableObjects.size()-1) return;
+    lastPressedIndex = index;
+    for( auto & selectableObject : selectableObjects){
+        switch(type){
+            case ST_RADIO:
+                
+                break;
+            case ST_TOGGLE:
+                
+                break;
+                
+            case ST_PRESSED:
+                if(selectableObject->getIndex() == lastPressedIndex) selectableObject->deactivate();
+                break;
+        }
+        
+    }
+    string currentSelectedKey = selectableObjects[lastPressedIndex]->getKey();
+    ofNotifyEvent(keyDeactivatedE, currentSelectedKey, this);
+    ofNotifyEvent(indexDeactivatedE, lastPressedIndex, this);
 }
 
 bool ofxSelectableObjects::mouseReleased(ofMouseEventArgs &e){
+    glm::vec2 mousePos = e;
+    if(type == ST_PRESSED){
+        for( auto & selectableObject : selectableObjects){
+            if(selectableObject->clickableSurface.inside(mousePos)){
+                deactivate(selectableObject->getIndex());
+            }
+        }
+    }
+}
+
+bool ofxSelectableObjects::mousePressed(ofMouseEventArgs &e){
     glm::vec2 mousePos = e;
     for( auto & selectableObject : selectableObjects){
         if(selectableObject->clickableSurface.inside(mousePos)){
@@ -168,9 +221,9 @@ int ofxSelectableObjects::size(){ return selectableObjects.size(); }
 
 int ofxSelectableObjects::getIndex(){
     if(selectableObjects.size() == 0) return -1;
-    else return currentSelectedIndex;
+    else return lastPressedIndex;
 }
-string ofxSelectableObjects::getKey(){ return currentSelectedKey; }
+string ofxSelectableObjects::getKey(){ return selectableObjects[lastPressedIndex]->getKey(); }
 
 void ofxSelectableObjects::setWindow(ofRectangle window){
     objectsRectangle = window;
