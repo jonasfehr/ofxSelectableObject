@@ -67,8 +67,15 @@ public:
     }
     
     bool isActive(){ return active; }
-    virtual void activate(){ active = true; }
-    virtual void deactivate(){ active = false; }
+    
+    virtual void activate(){
+        active = true;
+        ofNotifyEvent(isActiveE, active, this);
+    }
+    virtual void deactivate(){
+        active = false;
+        ofNotifyEvent(isActiveE, active, this);
+    }
     
     
 private:
@@ -78,7 +85,9 @@ private:
     bool hasImg;
     ofImage img;
     
+    
 public:
+    ofEvent<bool> isActiveE;
     ofRectangle clickableSurface;
 };
 

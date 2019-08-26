@@ -37,7 +37,8 @@ public:
     
     void clear();
     void draw();
-    
+    void drawButtons();
+
     bool select(string key);
     bool select(int index);
         

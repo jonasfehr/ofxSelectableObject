@@ -109,8 +109,12 @@ void ofxSelectableObjects::clear(){
     index = 0;
 }
 
-
 void ofxSelectableObjects::draw(){
+    drawButtons();
+}
+
+
+void ofxSelectableObjects::drawButtons(){
     int i = 0;
     for(auto & selectableObject : selectableObjects){
         selectableObject->draw();
