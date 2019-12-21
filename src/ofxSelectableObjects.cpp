@@ -207,9 +207,11 @@ bool ofxSelectableObjects::mouseReleased(ofMouseEventArgs &e){
         for( auto & selectableObject : selectableObjects){
             if(selectableObject->clickableSurface.inside(mousePos)){
                 deactivate(selectableObject->getIndex());
+				return true;
             }
         }
     }
+	return false;
 }
 
 bool ofxSelectableObjects::mousePressed(ofMouseEventArgs &e){
@@ -217,8 +219,10 @@ bool ofxSelectableObjects::mousePressed(ofMouseEventArgs &e){
     for( auto & selectableObject : selectableObjects){
         if(selectableObject->clickableSurface.inside(mousePos)){
             activate(selectableObject->getIndex());
+			return true;
         }
     }
+	return false;
 }
 
 int ofxSelectableObjects::size(){ return selectableObjects.size(); }
