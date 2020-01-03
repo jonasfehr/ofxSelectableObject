@@ -218,7 +218,7 @@ void ofxSelectableObjects::unlock(){
     isLocked = false;
 }
 
-bool ofxSelectableObjects::mouseReleased(ofMouseEventArgs &e){
+void ofxSelectableObjects::mouseReleased(ofMouseEventArgs &e){
     if(isLocked) return;
     
     glm::vec2 mousePos = e;
@@ -233,7 +233,7 @@ bool ofxSelectableObjects::mouseReleased(ofMouseEventArgs &e){
 	return false;
 }
 
-bool ofxSelectableObjects::mousePressed(ofMouseEventArgs &e){
+void ofxSelectableObjects::mousePressed(ofMouseEventArgs &e){
     if(isLocked) return;
     
     glm::vec2 mousePos = e;

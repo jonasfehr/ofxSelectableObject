@@ -52,8 +52,8 @@ public:
     void lock();
     void unlock();
 
-    bool mouseReleased(ofMouseEventArgs &e);
-    bool mousePressed(ofMouseEventArgs &e);
+    void mouseReleased(ofMouseEventArgs &e);
+    void mousePressed(ofMouseEventArgs &e);
 
     int size();
     
