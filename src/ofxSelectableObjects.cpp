@@ -10,7 +10,6 @@
 ofxSelectableObjects::ofxSelectableObjects(){
     ofAddListener(ofEvents().mouseReleased, this, &ofxSelectableObjects::mouseReleased, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().mousePressed, this, &ofxSelectableObjects::mousePressed, OF_EVENT_ORDER_BEFORE_APP);
-    index = 0;
     setup(0, 0, 200, 30, ST_RADIO, false, 0, 5);
 
 }
@@ -18,10 +17,6 @@ ofxSelectableObjects::ofxSelectableObjects(){
 ofxSelectableObjects::~ofxSelectableObjects(){
     ofRemoveListener(ofEvents().mouseReleased, this, &ofxSelectableObjects::mouseReleased, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().mousePressed, this, &ofxSelectableObjects::mousePressed, OF_EVENT_ORDER_BEFORE_APP);
-//    for (auto pointer : selectableObjects){
-//        delete pointer;
-//    }
-//    selectableObjects.clear();
 }
 
 
@@ -36,20 +31,22 @@ void ofxSelectableObjects::setup(int x, int y, int w, int h, SelectType type, bo
     this->fixedSize = fixedSize;
     this->isVertical = isVertical;
     this->index = 0;
+    this->lastPressedIndex = -1;
+    this->isLocked = false;
 }
 
-void ofxSelectableObjects::add(SelectableObjectBase &selectableObject){
+void ofxSelectableObjects::add(shared_ptr<SelectableObjectBase> selectableObject){
     
     
-    selectableObject.setIndex(index);
+    selectableObject->setIndex(index);
     index++;
     
-    selectableObjects.push_back(&selectableObject);
+    selectableObjects.push_back(selectableObject);
     
     recalcPositioning();
     // activate latest added
-    if(type == ST_RADIO) activate(selectableObject.getIndex());
-    else selectableObject.deactivate();
+    if(type == ST_RADIO) activate(selectableObject->getIndex());
+    else selectableObject->deactivate();
 }
 
 void ofxSelectableObjects::deleteSelected(){
@@ -201,7 +198,29 @@ void ofxSelectableObjects::deactivate(int index){
     ofNotifyEvent(indexDeactivatedE, lastPressedIndex, this);
 }
 
+void ofxSelectableObjects::activateCurrent(){
+    activate(lastPressedIndex);
+}
+
+void ofxSelectableObjects::deactivateCurrent(){
+    for( auto & selectableObject : selectableObjects){
+        if(selectableObject->isActive()){
+            deactivate(selectableObject->getIndex());
+        }
+    }
+}
+
+void ofxSelectableObjects::lock(){
+    isLocked = true;
+}
+
+void ofxSelectableObjects::unlock(){
+    isLocked = false;
+}
+
 bool ofxSelectableObjects::mouseReleased(ofMouseEventArgs &e){
+    if(isLocked) return;
+    
     glm::vec2 mousePos = e;
     if(type == ST_PRESSED){
         for( auto & selectableObject : selectableObjects){
@@ -215,6 +234,8 @@ bool ofxSelectableObjects::mouseReleased(ofMouseEventArgs &e){
 }
 
 bool ofxSelectableObjects::mousePressed(ofMouseEventArgs &e){
+    if(isLocked) return;
+    
     glm::vec2 mousePos = e;
     for( auto & selectableObject : selectableObjects){
         if(selectableObject->clickableSurface.inside(mousePos)){

@@ -29,7 +29,7 @@ public:
     void setup( ofRectangle rect, SelectType type = ST_RADIO,  bool isVertical = false, int fixedSize = 0, int spacing = 5);
     void setup(int x, int y, int w, int h, SelectType type = ST_RADIO, bool isVertical = false, int fixedSize = 0, int spacing = 5);
     
-    void add(SelectableObjectBase &selectableObject);
+    void add(shared_ptr<SelectableObjectBase> selectableObject);
     void recalcPositioning();
     void deleteSelected();
     void deleteAtIndex(int index);
@@ -46,6 +46,12 @@ public:
     
     void activate(int index);
     void deactivate(int index);
+    void activateCurrent();
+    void deactivateCurrent();
+    
+    void lock();
+    void unlock();
+
     bool mouseReleased(ofMouseEventArgs &e);
     bool mousePressed(ofMouseEventArgs &e);
 
@@ -56,7 +62,7 @@ public:
     
     void setWindow(ofRectangle window);
     
-    vector<SelectableObjectBase*> selectableObjects;
+    vector<shared_ptr<SelectableObjectBase>> selectableObjects;
     ofRectangle objectsRectangle;
     int index;
     int spacing, fixedSize;
@@ -70,6 +76,8 @@ public:
     ofEvent<int> indexActivatedE;
     ofEvent<string> keyDeactivatedE;
     ofEvent<int> indexDeactivatedE;
+    
+    bool isLocked;
 };
 #endif /* ofxSelectableObjects_hpp */
 
