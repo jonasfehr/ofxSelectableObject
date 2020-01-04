@@ -17,6 +17,12 @@ ofxSelectableObjects::ofxSelectableObjects(){
 ofxSelectableObjects::~ofxSelectableObjects(){
     ofRemoveListener(ofEvents().mouseReleased, this, &ofxSelectableObjects::mouseReleased, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().mousePressed, this, &ofxSelectableObjects::mousePressed, OF_EVENT_ORDER_BEFORE_APP);
+    
+//    for (auto p : childSelectableObjects)
+//    {
+//      delete p;
+//    }
+//    childSelectableObjects.clear();
 }
 
 
@@ -48,6 +54,10 @@ void ofxSelectableObjects::add(shared_ptr<SelectableObjectBase> selectableObject
     if(type == ST_RADIO) activate(selectableObject->getIndex());
     else selectableObject->deactivate();
 }
+
+//void ofxSelectableObjects::addChildObjects(ofxSelectableObjects &selectableObjects){
+//    childSelectableObjects.push_back(&selectableObjects);
+//}
 
 void ofxSelectableObjects::deleteSelected(){
     deleteAtIndex(getIndex());
@@ -110,7 +120,6 @@ void ofxSelectableObjects::draw(){
     drawButtons();
 }
 
-
 void ofxSelectableObjects::drawButtons(){
     int i = 0;
     for(auto & selectableObject : selectableObjects){
@@ -118,6 +127,12 @@ void ofxSelectableObjects::drawButtons(){
         i++;
     }
 }
+
+//void ofxSelectableObjects::drawChildObjects(){
+//    for(auto & c : childSelectableObjects){
+//        c->draw();
+//    }
+//}
 
 bool ofxSelectableObjects::select(string key){
     int index = getIndexFromKey(key);
@@ -198,24 +213,30 @@ void ofxSelectableObjects::deactivate(int index){
     ofNotifyEvent(indexDeactivatedE, lastPressedIndex, this);
 }
 
-void ofxSelectableObjects::activateCurrent(){
-    activate(lastPressedIndex);
-}
-
-void ofxSelectableObjects::deactivateCurrent(){
-    for( auto & selectableObject : selectableObjects){
-        if(selectableObject->isActive()){
-            deactivate(selectableObject->getIndex());
-        }
-    }
-}
+//void ofxSelectableObjects::activateCurrent(){
+//    activate(lastPressedIndex);
+//}
+//
+//void ofxSelectableObjects::deactivateCurrent(){
+//    for( auto & selectableObject : selectableObjects){
+//        if(selectableObject->isActive()){
+//            deactivate(selectableObject->getIndex());
+//        }
+//    }
+//}
 
 void ofxSelectableObjects::lock(){
     isLocked = true;
+//    for(auto & c : childSelectableObjects){
+//        c->lock();
+//    }
 }
 
 void ofxSelectableObjects::unlock(){
     isLocked = false;
+//    for(auto & c : childSelectableObjects){
+//        c->unlock();
+//    }
 }
 
 void ofxSelectableObjects::mouseReleased(ofMouseEventArgs &e){

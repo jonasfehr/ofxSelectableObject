@@ -14,12 +14,12 @@ class SelectableObjectBase{
 public:
     
     SelectableObjectBase(){}
-    SelectableObjectBase(string key, string imgPath = "none"){
-        setup(key, imgPath);
+    SelectableObjectBase(string key, string imgPath = "none", bool isLocked = false){
+        setup(key, imgPath, isLocked);
     }
     ~SelectableObjectBase(){}
     
-    void setup(string key, string imgPath = "none"){
+    void setup(string key, string imgPath = "none", bool isLocked = false){
         this->key = key;
         if(imgPath != "none"){
             hasImg = true;
@@ -28,6 +28,7 @@ public:
         }else{
             hasImg = false;
         }
+        this->isLocked = isLocked;
     }
     
     void setClickableSurface(int x, int y, int w, int h){
@@ -71,10 +72,21 @@ public:
     virtual void activate(){
         active = true;
         ofNotifyEvent(isActiveE, active, this);
+        cout << "activated: " << getKey() << endl;
     }
     virtual void deactivate(){
         active = false;
         ofNotifyEvent(isActiveE, active, this);
+        cout << "deactivated: " << getKey() << endl;
+
+    }
+    
+    virtual void lock(){
+        isLocked = true;
+    }
+    
+    virtual void unlock(){
+        isLocked = false;
     }
     
     
@@ -89,6 +101,7 @@ private:
 public:
     ofEvent<bool> isActiveE;
     ofRectangle clickableSurface;
+    bool isLocked;
 };
 
 #endif /* SelectableObjectBase_hpp */

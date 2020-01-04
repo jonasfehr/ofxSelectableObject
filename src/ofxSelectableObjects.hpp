@@ -30,6 +30,8 @@ public:
     void setup(int x, int y, int w, int h, SelectType type = ST_RADIO, bool isVertical = false, int fixedSize = 0, int spacing = 5);
     
     void add(shared_ptr<SelectableObjectBase> selectableObject);
+   // void addChildObjects(ofxSelectableObjects &selectableObjects);
+
     void recalcPositioning();
     void deleteSelected();
     void deleteAtIndex(int index);
@@ -38,6 +40,7 @@ public:
     void clear();
     void draw();
     void drawButtons();
+    //void drawChildObjects();
 
     bool select(string key);
     bool select(int index);
@@ -46,9 +49,10 @@ public:
     
     void activate(int index);
     void deactivate(int index);
-    void activateCurrent();
-    void deactivateCurrent();
+//    void activateCurrent();
+//    void deactivateCurrent();
     
+    // if the object is locked it won't react towards mouse input.
     void lock();
     void unlock();
 
@@ -67,6 +71,7 @@ public:
     int index;
     int spacing, fixedSize;
     bool isVertical;
+    bool isLocked;
     
     int lastPressedIndex;
     
@@ -77,7 +82,8 @@ public:
     ofEvent<string> keyDeactivatedE;
     ofEvent<int> indexDeactivatedE;
     
-    bool isLocked;
+    //vector<ofxSelectableObjects*> childSelectableObjects;
+    
 };
 #endif /* ofxSelectableObjects_hpp */
 
